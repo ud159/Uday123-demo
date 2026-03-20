@@ -1,0 +1,49 @@
+//count subarrays with sum >= x using prefix sums and binary search
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+
+// Count how many subarrays have sum >= x
+ll countSubarrays(vector<ll> &prefix, ll x) {
+    ll count = 0;
+    multiset<ll> s;
+    s.insert(0);
+    for(ll p : prefix) {
+        // Find number of prefix sums <= p - x
+        auto it = s.lower_bound(p - x + 1);
+        count += distance(s.begin(), it);
+        s.insert(p);
+    }
+    return count;
+}
+
+ll kthLargestSubarraySum(vector<int> &A, int K) {
+    int n = A.size();
+    vector<ll> prefix(n+1, 0);
+    for(int i = 0; i < n; i++) prefix[i+1] = prefix[i] + A[i];
+
+    ll low = *min_element(A.begin(), A.end());
+    ll high = prefix[n];
+    ll ans = 0;
+
+    while(low <= high) {
+        ll mid = low + (high - low)/2;
+        if(countSubarrays(prefix, mid) >= K) {
+            ans = mid;
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+    return ans;
+}
+
+int main() {
+    int n, K;
+    cin >> n >> K;
+    vector<int> A(n);
+    for(int i = 0; i < n; i++) cin >> A[i];
+
+    cout << kthLargestSubarraySum(A, K) << endl;
+    return 0;
+}
